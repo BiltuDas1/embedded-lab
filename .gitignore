@@ -1,0 +1,40 @@
+# --- Build Artifacts ---
+# Ignore compiled binaries and temporary build files
+[Bb]uild/
+[Oo]ut/
+*.o
+*.obj
+*.elf
+*.hex
+*.bin
+*.map
+
+# --- Arduino/ESP8266 Specific ---
+# Ignore local hardware and board configurations
+boards.local.txt
+*.pyc
+*.gch
+.arduinoIDE/
+*.swp
+
+# --- MicroPython / Python ---
+# Ignore Thonny and Python cache
+__pycache__/
+.thonny/
+.pydevproject
+.project
+.settings/
+
+# --- System Specific ---
+# Ignore OS-generated junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ignore all executables globally
+*.exe
+
+# --- THE DRIVER EXCEPTION ---
+# The lines below ensure your specific driver folder is SAVED.
+!drivers/
+!drivers/**/*
