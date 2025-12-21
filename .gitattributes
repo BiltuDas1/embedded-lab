@@ -1,1 +1,4 @@
 drivers/windows/CH341SER.INF text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.ino text eol=lf

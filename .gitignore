@@ -34,7 +34,20 @@ ehthumbs.db
 # ignore all executables globally
 *.exe
 
-# --- THE DRIVER EXCEPTION ---
-# The lines below ensure your specific driver folder is SAVED.
-!drivers/
-!drivers/**/*
+# --- Driver Exception ---
+!/assets/drivers/
+!/assets/drivers/**/*
+
+# --- Platform Specific ---
+__pycache__/          # MicroPython (PICO)
+.thonny/               # Thonny IDE
+.arduinoIDE/           # Arduino IDE 2.x
+
+# Vs Code
+.vscode/
+
+# Lock file
+*.lock
+
+# Skip environment
+*.env

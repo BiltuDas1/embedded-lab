@@ -2,30 +2,84 @@
 
 A personal collection of embedded systems experiments, code snippets, and learning resources. This repository serves as a log of my progress, a reference for past work, and a source of motivation to see how far I've come.
 
-## 📌 Overview
+- [Embedded Lab](#embedded-lab)
+  - [How to use](#how-to-use)
+  - [How to compile](#how-to-compile)
+  - [FAQ](#faq)
+    - [Board Not Found](#board-not-found)
 
-This repository contains various embedded programming exercises, firmware prototypes, and small tests. The code is organized into folders based on different categories of embedded systems work.
+## How to use
 
-## 🚀 Getting Started
+- Clone this repo
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/BiltuDas1/embedded-lab.git
-   ```
-2. **Explore the code** by navigating through the folders.
-3. **Use an appropriate IDE** (e.g., Arduino IDE, PlatformIO) to edit and flash the code.
+  ```bash
+  git clone https://github.com/BiltuDas1/embedded-lab
+  ```
 
-## 🛠 Technologies & Languages
+- Download [Arduino CLI](https://docs.arduino.cc/arduino-cli/installation/)
+- Set the Arduino CLI in Path, and done
 
-- **C++** – Primary language for firmware development.
-- **Python** – Used occasionally for scripting and testing.
+## How to compile
 
-## 📂 Repository Structure
+- Connect your MCU (Microcontroller Unit) with PC
+- Open Terminal
+  - If Windows then open Powershell and enter:
 
-- Code is organized based on different embedded platforms.
-- Each folder contains relevant source files, scripts, and notes.
+    ```powershell
+    . ./tools/source.ps1
+    ```
 
-## 📜 Notes
+  - If Unix/Linux based system then enter:
 
-- Some code may be experimental, incomplete, or used for testing concepts.
-- The repository will continue evolving as I explore more embedded topics.
+    ```bash
+    source ./tools/source.sh
+    ```
+
+- Get Port of the connected MCU
+
+  ```bash
+  arduino-cli board list
+  ```
+
+- Create a `config.env` file at the root and then keep the `Port` value like this:
+  ```env
+  PORT=COM4
+  ```
+- Now choose the MCU from the list and note down the `FQBN`, and then store the value to the `config.env` file like this
+
+  ```env
+  PORT=COM4
+  BOARD_ID=esp8266:esp8266:generic
+  ```
+
+  > If the specific device is not found then [see here](#board-not-found)
+
+- Now for compiling use the command
+  ```bash
+  cross-compile . # For compiling current directory
+  ```
+  ```bash
+  cross-compile src/blink_led # For compiling a specific directory
+  ```
+- After the compilation done, use this to push the code to MCU
+  ```bash
+  cross-compile --upload
+  ```
+
+## FAQ
+
+### Board Not Found
+
+- If the board not found then add the board URL like this
+  ```bash
+  arduino-cli config add board_manager.additional_urls http://arduino.esp8266.com/stable/package_esp8266com_index.json
+  ```
+- Update the board list
+  ```bash
+  arduino-cli core update-index
+  ```
+- Install the device package like this
+  ```bash
+  arduino-cli core install esp8266:esp8266
+  ```
+- Now the device will be visible in the list
