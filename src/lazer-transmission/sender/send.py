@@ -1,26 +1,26 @@
 from machine import Pin
 import time
 
-lazer = Pin(15, Pin.OUT)
-MESSAGE = "THE QUICK BROWN FOX JUMPS OVER 13 LAZY DOGS! @2025"
 
 # 40Hz timing: 25,000us per bit
-BIT_TIME = 25000 
+BIT_TIME = 25000
 
-def send_word_fast(text):
-    print(f"Sending message (Efficient 40Hz): {text}")
-    
-    # 1. PREAMBLE (Reduced to 1s for speed)
-    lazer.on()
-    time.sleep(1)
-    lazer.off()
-    time.sleep(0.5) # Ready Gap
-    
+def send_bits(lazer: Pin, bits_stream: tuple[tuple[bytes]]):
+    # 1. INITIAL ANCHOR
     anchor = time.ticks_us()
 
-    for char in text:
-        bits = [int(i) for i in "{:08b}".format(ord(char))]
-        
+    # 2. PREAMBLE (1s ON) - Non-blocking high precision
+    anchor = time.ticks_add(anchor, 1000000)
+    lazer.on()
+    while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
+    
+    # 3. READY GAP (0.5s OFF)
+    anchor = time.ticks_add(anchor, 500000)
+    lazer.off()
+    while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
+
+    # 4. DATA LOOP
+    for bits in bits_stream:       
         # --- Start Bit (25ms) ---
         anchor = time.ticks_add(anchor, BIT_TIME)
         lazer.on()
@@ -37,9 +37,3 @@ def send_word_fast(text):
         lazer.off()
         while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
 
-    print("Transmission Complete.")
-
-try:
-    send_word_fast(MESSAGE)
-except KeyboardInterrupt:
-    lazer.off()
