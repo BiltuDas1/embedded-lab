@@ -1,4 +1,5 @@
-#define LED_PIN 14 // WeMos-D1R2
+// #define LED_PIN 14 // WeMos-D1R2
+#define LED_PIN 25
 
 void setup() {
   Serial.begin(115200);

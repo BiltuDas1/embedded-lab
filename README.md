@@ -45,6 +45,10 @@ A personal collection of embedded systems experiments, code snippets, and learni
   ```env
   PORT=COM4
   ```
+- Now enter the command to list all the boards
+  ```bash
+  arduino-cli board listall
+  ```
 - Now choose the MCU from the list and note down the `FQBN`, and then store the value to the `config.env` file like this
 
   ```env
@@ -56,14 +60,14 @@ A personal collection of embedded systems experiments, code snippets, and learni
 
 - Now for compiling use the command
   ```bash
-  cross-compile . # For compiling current directory
+  cross-compiler . # For compiling current directory
   ```
   ```bash
-  cross-compile src/blink_led # For compiling a specific directory
+  cross-compiler src/blink_led # For compiling a specific directory
   ```
 - After the compilation done, use this to push the code to MCU
   ```bash
-  cross-compile --upload
+  cross-compiler --upload
   ```
 
 ## FAQ
