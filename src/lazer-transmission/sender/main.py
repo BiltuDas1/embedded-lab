@@ -1,17 +1,19 @@
 from machine import Pin
-import time
-import send
-import checksum
+import send, hamming
 
 lazer = Pin(15, Pin.OUT)
+# MESSAGE = "COMMENCING LONG-DURATION OPTICAL LINK STRESS TEST. SYSTEMS CHECK: HAMMING ENCODING ACTIVE, LDR SATURATION MONITORING ENABLED, 10K PULL-DOWN RESISTOR THERMAL DRIFT EXPECTED. THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG ONE HUNDRED TIMES TO VERIFY SIGNAL INTEGRITY. 0123456789!@#$%^&*() BIT-SMEARING IS THE ENEMY OF PRECISION. IF YOU CAN READ THIS ENTIRE PARAGRAPH WITHOUT A SINGLE BLOCK ERROR, YOUR HARDWARE ALIGNMENT AND TIMING SYNCHRONIZATION ARE OFFICIALLY FLIGHT-READY FOR DEEP SPACE DATA TRANSMISSION. END OF DATA STREAM."
 MESSAGE = "THE QUICK BROWN FOX JUMPS OVER 13 LAZY DOGS! @2025"
 
-try:
-    BITS = list()
-    for char in MESSAGE:
-        BITS.append((int(i) for i in "{:08b}".format(ord(char))))
-    BITS.append((int(i) for i in "{:08b}".format(checksum.calculate_checksum(MESSAGE))))
-    send.send_bits(lazer, tuple(BITS))
+blocks = []
+for char in MESSAGE:
+    val = ord(char)
+    # Split into 2 nibbles
+    for nibble in [(val >> 4) & 0x0F, val & 0x0F]:
+        # Convert nibble to bit tuple
+        n_bits = [(nibble >> i) & 1 for i in range(3, -1, -1)]
+        blocks.append(hamming.hamming_7_4(n_bits))
 
-except KeyboardInterrupt:
-    lazer.off()
+print(f"Sending: {MESSAGE}")
+send.send_bits(lazer, blocks)
+lazer.off()

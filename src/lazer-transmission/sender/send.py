@@ -1,39 +1,55 @@
 from machine import Pin
 import time
 
+# --- TIMING CONFIGURATION (40Hz) ---
+# 1 second / 40 bits = 0.025 seconds = 25,000 microseconds
+BIT_TIME = 40000 
 
-# 40Hz timing: 25,000us per bit
-BIT_TIME = 25000
-
-def send_bits(lazer: Pin, bits_stream: tuple[tuple[bytes]]):
+def send_bits(lazer: Pin, blocks: list):
+    """
+    Sends a list of 8-bit Hamming blocks via laser.
+    Each block is preceded by a Start Bit (ON) and followed by a Gap (OFF).
+    """
     # 1. INITIAL ANCHOR
+    # We use a single anchor and increment it to prevent "Time Drift"
     anchor = time.ticks_us()
 
-    # 2. PREAMBLE (1s ON) - Non-blocking high precision
-    anchor = time.ticks_add(anchor, 1000000)
+    # 2. PREAMBLE (1s ON) 
+    # This wakes up the receiver and establishes the noise floor
     lazer.on()
+    anchor = time.ticks_add(anchor, 1000000)
     while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
     
     # 3. READY GAP (0.5s OFF)
-    anchor = time.ticks_add(anchor, 500000)
+    # This tells the receiver: "Get ready, the real data starts now"
     lazer.off()
+    anchor = time.ticks_add(anchor, 500000)
     while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
 
-    # 4. DATA LOOP
-    for bits in bits_stream:       
-        # --- Start Bit (25ms) ---
-        anchor = time.ticks_add(anchor, BIT_TIME)
+    print(f"Blasting {len(blocks)} Hamming blocks...")
+
+    # 4. DATA TRANSMISSION LOOP
+    for block in blocks:
+        # --- START BIT (Always ON) ---
+        # The receiver triggers exactly when this bit hits
         lazer.on()
+        anchor = time.ticks_add(anchor, BIT_TIME)
         while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
         
-        # --- Data Bits (8 x 25ms) ---
-        for b in bits:
+        # --- 8 DATA BITS (The Hamming Word) ---
+        # We iterate through the bits provided by the Hamming encoder
+        for bit in block:
+            lazer.value(bit)
             anchor = time.ticks_add(anchor, BIT_TIME)
-            lazer.value(b)
             while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
             
-        # --- Character Gap (25ms) ---
-        anchor = time.ticks_add(anchor, BIT_TIME)
+        # --- CHARACTER GAP (Always OFF) ---
+        # We hold the laser OFF for BIT_TIME ms
+        # This prevents the receiver from "missing the train" for the next byte
         lazer.off()
+        anchor = time.ticks_add(anchor, BIT_TIME)
         while time.ticks_diff(anchor, time.ticks_us()) > 0: pass
 
+    # 5. FINAL SHUTDOWN
+    lazer.off()
+    print("Transmission Complete.")
