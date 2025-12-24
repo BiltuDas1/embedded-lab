@@ -68,16 +68,18 @@ while True:
     # FINAL PERFORMANCE REPORT
     t_end_data = time.ticks_us()
     
-    full_message = "".join((chr(anum) for anum in data_list[:-1]))
+    received_checksum_byte = data_list[-1] if data_list else 0
+    message_bytes = data_list[:-1]
+    full_message = "".join(chr(b) for b in message_bytes if 32 <= b <= 126)
     
     if t_start_data:
         # Duration = (End Time - Start Time - The 1s we spent waiting for timeout)
-        total_time_us = time.ticks_diff(t_end_data, t_start_data) - 1000000
-        total_seconds = total_time_us / 1000000
-        
+        total_seconds = (time.ticks_diff(t_end_data, t_start_data) - 1000000) / 1000000
+            
         print(f"\n\n--- TRANSMISSION REPORT ---")
-        print(f"Total Message: {full_message}")
-        print(f"Data Corrupted: {'No' if checksum == 0 else 'Yes'}")
-        print(f"Total Time:    {total_seconds:.2f} seconds")
-        print(f"Speed:         {len(data_list)/total_seconds:.2f} chars/sec")
+        print(f"Status:        {'SUCCESS' if checksum == 0 else 'CORRUPTED'}")
+        print(f"Message:       {full_message}")
+        print(f"Raw Message:   {message_bytes}") 
+        print(f"Checksum:      {received_checksum_byte} (Net XOR: {checksum})")
+        print(f"Efficiency:    {len(data_list)/total_seconds:.2f} chars/sec")
         print("-" * 30)
